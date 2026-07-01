@@ -1,52 +1,54 @@
 const express = require('express');
 const path = require('path');
 const app = express();
-const PORT = 3000;
 
-// Middleware - Frontend files ko serve karne aur JSON data padhne ke liye
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-// 1. Database Mock (Products ki list backend par)
+// Local and Cloud hosting safe port connection setup
+const PORT = process.env.PORT || 3000;
+
+// Dummy Product and User In-Memory DB Array 
 const products = [
-    { id: 1, name: "Wireless Mouse", price: 799, category: "Tech" },
-    { id: 2, name: "Mechanical Keyboard", price: 2499, category: "Tech" },
-    { id: 3, name: "Gaming Headphones", price: 1999, category: "Audio" },
-    { id: 4, name: "Smart Watch", price: 3499, category: "Wearable" }
+    { id: 1, name: "Alpha Gaming Mouse", price: 1200 },
+    { id: 2, name: "Mechanical RGB Keyboard", price: 3500 },
+    { id: 3, name: "Wireless Noise Cancelling Headphones", price: 4999 },
+    { id: 4, name: "UltraWide 24inch Gaming Monitor", price: 12500 }
 ];
+const users = [];
 
-// Orders ko store karne ke liye ek array (Database ki tarah)
-let orders = [];
+// Base UI Endpoint Routing
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// 2. API Route - Saare products frontend ko bhejne ke liye
+// Products Fetch Endpoint API
 app.get('/api/products', (req, res) => {
     res.json(products);
 });
 
-// 3. API Route - Order receive karne ke liye (Checkout API)
-app.post('/api/checkout', (req, res) => {
-    const { cartItems, totalAmount } = req.body;
-    
-    if (!cartItems || cartItems.length === 0) {
-        return res.status(400).json({ success: false, message: "Cart khali hai!" });
+// User Registration Database Handling Route
+app.post('/api/register', (req, res) => {
+    const { name, email, password } = req.body;
+    const userExists = users.find(u => u.email === email);
+    if (userExists) {
+        return res.status(400).json({ message: "Yeh Email pehle se registered hai!" });
     }
-
-    // Naya order object banana
-    const newOrder = {
-        orderId: 'ORD' + Date.now(),
-        items: cartItems,
-        total: totalAmount,
-        date: new Date()
-    };
-
-    // Orders array mein save karna
-    orders.push(newOrder);
-    console.log("New Order Received:", newOrder); // Terminal par dikhega
-
-    res.json({ success: true, message: "Order processed successfully!", orderId: newOrder.orderId });
+    users.push({ name, email, password });
+    res.status(201).json({ message: "Registration successful! Ab aap login kar sakte hain." });
 });
 
-// Server ko start karna
+// User Validation Login Check Endpoint Route
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) {
+        return res.status(401).json({ message: "Galat Email ya Password!" });
+    }
+    res.status(200).json({ message: `Welcome back, ${user.name}! Login ho gaya.` });
+});
+
+// Trigger Server Listener
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server is running securely at http://localhost:${PORT}`);
 });

@@ -3,46 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeAlpha E-Commerce Store</title>
+    <title>AlphaShop - CodeAlpha Store</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Header / Navbar -->
-    <header>
+    <!-- Navigation Bar -->
+    <header class="navbar">
         <div class="logo">AlphaShop</div>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">Products</a>
-            <a href="#cart-section">Cart (<span id="cart-count">0</span>)</a>
+            <a href="#" onclick="showSection('products-section')">Home</a>
+            <a href="#" onclick="showSection('products-section')">Products</a>
+            <a href="#" onclick="showSection('cart-section')">Cart (<span id="cart-count">0</span>)</a>
+            <button class="auth-btn" onclick="openAuthModal()">Login / Register</button>
         </nav>
     </header>
 
-    <!-- Main Products Section -->
-    <main>
-        <section class="hero">
-            <h1>Welcome to CodeAlpha Store</h1>
-            <p>Find the best tech products here!</p>
-        </section>
+    <!-- Hero Banner -->
+    <section class="hero">
+        <h1>Welcome to CodeAlpha Store</h1>
+        <p>Find the best tech products here!</p>
+    </section>
 
+    <!-- Products Section -->
+    <main id="products-section" class="container">
         <h2>Our Products</h2>
-        <div class="products-container" id="products-list">
-            <!-- Products JavaScript se yahan load honge -->
+        <div id="product-list" class="grid">
+            <!-- Products dynamic loaded via app.js -->
         </div>
     </main>
 
-    <!-- Shopping Cart Section -->
-    <section id="cart-section" class="cart-container">
+    <!-- Cart Section -->
+    <main id="cart-section" class="container" style="display: none;">
         <h2>Your Shopping Cart</h2>
-        <div id="cart-items">
-            <!-- Cart ke items yahan dikhenge -->
-            <p>Your cart is empty.</p>
+        <div id="cart-items" class="cart-box">
+            <!-- Cart items loaded here -->
         </div>
-        <div class="cart-total">
-            <h3>Total: ₹<span id="cart-total-price">0</span></h3>
-            <button id="checkout-btn">Proceed to Order</button>
+        <div class="cart-summary">
+            <h3>Total: ₹<span id="cart-total">0</span></h3>
+            <button class="checkout-btn" onclick="checkout()">Proceed to Order</button>
         </div>
-    </section>
+    </main>
+
+    <!-- Authentication Popup Modal (Login/Register) -->
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAuthModal()">&times;</span>
+            
+            <!-- Login Form -->
+            <div id="login-form-box">
+                <h3>Login to AlphaShop</h3>
+                <form id="login-form">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                    <input type="password" id="login-pass" placeholder="Password" required>
+                    <button type="submit" class="btn btn-login">Login</button>
+                </form>
+                <p>Naya account banana hai? <a href="#" onclick="toggleAuthForm(true)">Register Karein</a></p>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form-box" style="display: none;">
+                <h3>Create Account</h3>
+                <form id="register-form">
+                    <input type="text" id="reg-name" placeholder="Full Name" required>
+                    <input type="email" id="reg-email" placeholder="Email Address" required>
+                    <input type="password" id="reg-pass" placeholder="Password" required>
+                    <button type="submit" class="btn btn-register">Register</button>
+                </form>
+                <p>Pehle se account hai? <a href="#" onclick="toggleAuthForm(false)">Login Karein</a></p>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

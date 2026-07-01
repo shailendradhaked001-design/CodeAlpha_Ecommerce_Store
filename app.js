@@ -1,112 +1,125 @@
 let cart = [];
 
-const productsListContainer = document.getElementById("products-list");
-const cartItemsContainer = document.getElementById("cart-items");
-const cartCountElement = document.getElementById("cart-count");
-const cartTotalPriceElement = document.getElementById("cart-total-price");
-const checkoutBtn = document.getElementById("checkout-btn");
-
-// Global variable backend products ko store karne ke liye
-let localProductsList = [];
-
-// 1. Backend API se Products fetch karna
-async function loadProductsFromBackend() {
-    try {
-        const response = await fetch('/api/products');
-        localProductsList = await response.json();
-        displayProducts(localProductsList);
-    } catch (error) {
-        console.error("Products load karne mein dikkat aayi:", error);
-    }
-}
-
-function displayProducts(products) {
-    productsListContainer.innerHTML = "";
-    products.forEach(product => {
-        const productCard = document.createElement("div");
-        productCard.classList.add("product-card");
-        productCard.innerHTML = `
-            <h3>${product.name}</h3>
-            <p class="price">₹${product.price}</p>
-            <button onclick="addToCart(${product.id})">Add to Cart</button>
-        `;
-        productsListContainer.appendChild(productCard);
-    });
-}
-
-function addToCart(productId) {
-    const product = localProductsList.find(p => p.id === productId);
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({ ...product, quantity: 1 });
-    }
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    cartCountElement.innerText = totalCount;
-    
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = "<p>Your cart is empty.</p>";
-        cartTotalPriceElement.innerText = "0";
-        return;
-    }
-    
-    cartItemsContainer.innerHTML = "";
-    let totalPrice = 0;
-    
-    cart.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        totalPrice += itemTotal;
-        
-        const cartItemDiv = document.createElement("div");
-        cartItemDiv.classList.add("cart-item");
-        cartItemDiv.innerHTML = `
-            <div>
-                <h4>${item.name}</h4>
-                <small>₹${item.price} x ${item.quantity}</small>
-            </div>
-            <span>₹${itemTotal}</span>
-        `;
-        cartItemsContainer.appendChild(cartItemDiv);
-    });
-    
-    cartTotalPriceElement.innerText = totalPrice;
-}
-
-// 2. Backend API par Order data bhejna (Checkout)
-checkoutBtn.addEventListener("click", async () => {
-    if (cart.length === 0) {
-        alert("Aapka cart khali hai!");
-        return;
-    }
-    
-    const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-    try {
-        const response = await fetch('/api/checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cartItems: cart, totalAmount: totalAmount })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert(`🎉 ${result.message}\nOrder ID: ${result.orderId}`);
-            cart = [];
-            updateCartUI();
-        } else {
-            alert("Order fail ho gaya!");
-        }
-    } catch (error) {
-        console.error("Checkout error:", error);
-    }
+// App initialization
+document.addEventListener("DOMContentLoaded", () => {
+    fetchProducts();
 });
 
-// App shuru hote hi backend se data mangwana
-loadProductsFromBackend();
+// Fetch products from full-stack backend server
+async function fetchProducts() {
+    try {
+        const res = await fetch('/api/products');
+        const products = await res.json();
+        const productList = document.getElementById('product-list');
+        productList.innerHTML = '';
+
+        products.forEach(product => {
+            productList.innerHTML += `
+                <div class="card">
+                    <h3>${product.name}</h3>
+                    <p class="price">₹${product.price}</p>
+                    <button class="add-btn" onclick="addToCart(${product.id}, '${product.name}', ${product.price})">Add to Cart</button>
+                </div>
+            `;
+        });
+    } catch (err) {
+        console.error("Products load karne mein dikkat aayi:", err);
+    }
+}
+
+// Section logic switcher
+function showSection(sectionId) {
+    document.getElementById('products-section').style.display = sectionId === 'products-section' ? 'block' : 'none';
+    document.getElementById('cart-section').style.display = sectionId === 'cart-section' ? 'block' : 'none';
+    if(sectionId === 'cart-section') renderCart();
+}
+
+// Add to Cart
+function addToCart(id, name, price) {
+    const item = cart.find(p => p.id === id);
+    if(item) {
+        item.qty++;
+    } else {
+        cart.push({id, name, price, qty: 1});
+    }
+    updateCartCount();
+    alert(`${name} cart mein add ho gaya!`);
+}
+
+function updateCartCount() {
+    const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
+    document.getElementById('cart-count').innerText = totalQty;
+}
+
+// Render Cart view
+function renderCart() {
+    const cartItems = document.getElementById('cart-items');
+    const cartTotal = document.getElementById('cart-total');
+    cartItems.innerHTML = '';
+    
+    if(cart.length === 0) {
+        cartItems.innerHTML = '<p>Aapka cart khali hai.</p>';
+        cartTotal.innerText = '0';
+        return;
+    }
+
+    let total = 0;
+    cart.forEach(item => {
+        total += item.price * item.qty;
+        cartItems.innerHTML += `
+            <div class="cart-item">
+                <span>${item.name} (x${item.qty})</span>
+                <span>₹${item.price * item.qty}</span>
+            </div>
+        `;
+    });
+    cartTotal.innerText = total;
+}
+
+function checkout() {
+    if(cart.length === 0) return alert("Pehle cart mein kuch add toh karo!");
+    alert("Order successful! Thank you for shopping at AlphaShop.");
+    cart = [];
+    updateCartCount();
+    showSection('products-section');
+}
+
+// Modal Toggle utilities
+function openAuthModal() { document.getElementById('auth-modal').style.display = 'flex'; }
+function closeAuthModal() { document.getElementById('auth-modal').style.display = 'none'; }
+function toggleAuthForm(showRegister) {
+    document.getElementById('login-form-box').style.display = showRegister ? 'none' : 'block';
+    document.getElementById('register-form-box').style.display = showRegister ? 'block' : 'none';
+}
+
+// User Actions Handlers
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('reg-name').value;
+    const email = document.getElementById('reg-email').value;
+    const password = document.getElementById('reg-pass').value;
+
+    const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    alert(data.message);
+    if(res.ok) toggleAuthForm(false);
+});
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-pass').value;
+
+    const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    alert(data.message);
+    if(res.ok) closeAuthModal();
+});
