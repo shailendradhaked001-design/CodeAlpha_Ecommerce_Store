@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeAlpha E-Commerce Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <header>
+        <div class="logo">AlphaShop</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Products</a>
+            <a href="#cart-section">Cart (<span id="cart-count">0</span>)</a>
+        </nav>
+    </header>
+
+    <!-- Main Products Section -->
+    <main>
+        <section class="hero">
+            <h1>Welcome to CodeAlpha Store</h1>
+            <p>Find the best tech products here!</p>
+        </section>
+
+        <h2>Our Products</h2>
+        <div class="products-container" id="products-list">
+            <!-- Products JavaScript se yahan load honge -->
+        </div>
+    </main>
+
+    <!-- Shopping Cart Section -->
+    <section id="cart-section" class="cart-container">
+        <h2>Your Shopping Cart</h2>
+        <div id="cart-items">
+            <!-- Cart ke items yahan dikhenge -->
+            <p>Your cart is empty.</p>
+        </div>
+        <div class="cart-total">
+            <h3>Total: ₹<span id="cart-total-price">0</span></h3>
+            <button id="checkout-btn">Proceed to Order</button>
+        </div>
+    </section>
+
+    <script src="app.js"></script>
+</body>
+</html>
